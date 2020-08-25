@@ -846,6 +846,17 @@ SetLaunchArgs( UIApplication *application, NSDictionary *launchOptions, Rtt::Run
 	return result;
 }
 
+-(BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {
+	BOOL result = YES;
+
+	if ( [[self getCoronaAppDelegate] respondsToSelector:_cmd] )
+	{
+		result = [[self getCoronaAppDelegate] application:application continueUserActivity:userActivity restorationHandler:restorationHandler];
+	}
+
+	return result;
+}
+
 - (void) showSplashScreen
 {
 	UIImage *splashImage = [UIImage imageNamed:@"_CoronaSplashScreen.png"];

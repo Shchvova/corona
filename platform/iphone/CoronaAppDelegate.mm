@@ -160,6 +160,27 @@
 	
 	return result;
 }
+
+-(BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {
+
+	BOOL result = YES;
+	
+	for ( id delegate in _fCoronaPluginDelegates ) {
+		if ( [delegate respondsToSelector:_cmd] && delegate != _fEnterpriseDelegate )
+		{
+			[delegate application:application continueUserActivity:userActivity restorationHandler:restorationHandler];
+		}
+	}
+	
+	if ( [_fEnterpriseDelegate respondsToSelector:_cmd] )
+	{
+		result = [_fEnterpriseDelegate application:application continueUserActivity:userActivity restorationHandler:restorationHandler];
+	}
+	
+	return result;
+}
+
+
 #endif // Rtt_TVOS_ENV
 
 - (BOOL)application:(UIApplication*)application willFinishLaunchingWithOptions:(NSDictionary *)launchOptions
