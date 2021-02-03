@@ -47,7 +47,7 @@ import android.os.Environment;
 import android.location.Location;
 import android.util.Base64;
 import android.util.Log;
-import android.view.DisplayCutout;
+import android.view.WindowInsets;
 
 import dalvik.system.DexClassLoader;
 
@@ -1552,9 +1552,9 @@ public class NativeToJavaBridge {
 		float[] result = new float[4];
 		synchronized (runtime.getController()) {
 			CoronaStatusBarApiListener listener = runtime.getController().getCoronaStatusBarApiListener();
-			CoronaStatusBarSettings statusBarMode = listener.getStatusBarMode();
-			boolean hasNavigationBar = listener.HasSoftwareKeys();
 			if (listener != null) {
+				CoronaStatusBarSettings statusBarMode = listener.getStatusBarMode();
+				boolean hasNavigationBar = listener.HasSoftwareKeys();
 				if (listener.IsAndroidTV()) {
 					int contentHeight = JavaToNativeShim.getContentHeightInPixels(runtime);
 					int contentWidth = JavaToNativeShim.getContentWidthInPixels(runtime);
@@ -1562,13 +1562,27 @@ public class NativeToJavaBridge {
 					result[ 1 ] = result[ 2 ] = (float)Math.floor(contentWidth * 0.05f);
 				}
 				else {
-					DisplayCutout cutout = CoronaEnvironment.getCoronaActivity().getDisplayCutout();
-					if ((android.os.Build.VERSION.SDK_INT >= 26) && (cutout != null)){
-
-						result[0] = cutout.getSafeInsetTop();
-						result[1] = cutout.getSafeInsetLeft();
-						result[2] = cutout.getSafeInsetRight();
-						result[3] = cutout.getSafeInsetBottom();
+					WindowInsets wi = CoronaEnvironment.getCoronaActivity().getDisplayInsets();
+					if (android.os.Build.VERSION.SDK_INT >= 20 && wi != null){
+						result[0] = wi.getSystemWindowInsetTop();
+						result[1] = wi.getSystemWindowInsetLeft();
+						result[2] = wi.getSystemWindowInsetRight();
+						result[3] = wi.getSystemWindowInsetBottom();
+						if(android.os.Build.VERSION.SDK_INT >= 21) {
+							result[0] = wi.getStableInsetTop();
+							result[1] = wi.getStableInsetLeft();
+							result[2] = wi.getStableInsetRight();
+							result[3] = wi.getStableInsetBottom();
+						}
+						if(android.os.Build.VERSION.SDK_INT >= 28) {
+							android.view.DisplayCutout cutout = wi.getDisplayCutout();
+							if(cutout!=null) {
+								result[0] = Math.max(result[0], cutout.getSafeInsetTop());
+								result[1] = Math.max(result[1], cutout.getSafeInsetLeft());
+								result[2] = Math.max(result[2], cutout.getSafeInsetRight());
+								result[3] = Math.max(result[3], cutout.getSafeInsetBottom());
+							}
+						}
 					}
 					else {
                         result[0] = (statusBarMode != CoronaStatusBarSettings.HIDDEN) ? listener.getStatusBarHeight() : 0;

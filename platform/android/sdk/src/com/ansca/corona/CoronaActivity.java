@@ -19,6 +19,7 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.WindowInsets;
 import android.view.animation.AlphaAnimation;
 import android.view.Window;
 import android.view.WindowManager;
@@ -32,7 +33,7 @@ import com.ansca.corona.permissions.PermissionsServices;
 import com.ansca.corona.permissions.PermissionState;
 import com.ansca.corona.permissions.RequestPermissionsResultData;
 import com.ansca.corona.storage.ResourceServices;
-import android.view.DisplayCutout;
+import android.view.WindowInsets;
 import android.view.ViewTreeObserver;
 /** 
  * The activity window that hosts the Corona project. 
@@ -50,7 +51,7 @@ public class CoronaActivity extends Activity {
 	private com.ansca.corona.purchasing.StoreProxy myStore = null;
 	private CoronaStatusBarSettings myStatusBarMode;
 	private android.database.ContentObserver fAutoRotateObserver = null;
-	private DisplayCutout fDisplayCutout = null;
+	private WindowInsets fWindowInsets = null;
 	
 	private Controller fController;
 	private CoronaRuntime fCoronaRuntime;
@@ -1115,13 +1116,12 @@ public class CoronaActivity extends Activity {
 		if (mode == myStatusBarMode) {
 			return;
 		}
-		if (android.os.Build.VERSION.SDK_INT >= 28) {
+		if (android.os.Build.VERSION.SDK_INT >= 20) {
 			getWindow().getDecorView().setOnApplyWindowInsetsListener(new android.view.View.OnApplyWindowInsetsListener() {
 				@Override
 				public android.view.WindowInsets onApplyWindowInsets(android.view.View v, android.view.WindowInsets insets) {
-					v.onApplyWindowInsets(insets);
-					fDisplayCutout = insets.consumeStableInsets().getDisplayCutout();
-					return insets;
+					fWindowInsets = v.onApplyWindowInsets(insets);
+					return fWindowInsets;
 				}
 			} );
 		}
@@ -1194,8 +1194,8 @@ public class CoronaActivity extends Activity {
 		return myStatusBarMode;
 	}
 
-	public android.view.DisplayCutout getDisplayCutout(){
-		return fDisplayCutout;
+	public android.view.WindowInsets getDisplayInsets(){
+		return fWindowInsets;
 	}
 	
 	int getStatusBarHeight() {
